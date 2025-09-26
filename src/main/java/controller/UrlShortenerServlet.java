@@ -38,24 +38,43 @@ public class UrlShortenerServlet extends HttpServlet {
 
         try {
             UrlDao dao = new UrlDao();
-            String shortCode = generateUniqueShortCode(dao);
-            
-            boolean saved = dao.saveUrlMapping(longUrl, shortCode);
-            
-            if (saved) {
-                // Build the short URL
-                String baseUrl = getBaseUrl(request);
-                String shortUrl = baseUrl + "/r/" + shortCode;
-                
-                request.setAttribute("shortUrl", shortUrl);
-                request.setAttribute("originalUrl", longUrl);
-                RequestDispatcher dispatcher = request.getRequestDispatcher("result.jsp");
-                dispatcher.forward(request, response);
+            String existingShortCode = dao.getShortCodeByLongUrl(longUrl);
+            String shortCode;
+            if (existingShortCode != null) {
+                // Already exists → reuse old short code
+                shortCode = existingShortCode;
             } else {
-                request.setAttribute("error", "Failed to create short URL. Please try again.");
-                RequestDispatcher dispatcher = request.getRequestDispatcher("index.jsp");
-                dispatcher.forward(request, response);
+                // ✅ 2. Generate a new unique short code
+                shortCode = generateUniqueShortCode(dao);
+                dao.saveUrlMapping(longUrl, shortCode);
             }
+            
+            
+            // Build the short URL
+            String baseUrl = getBaseUrl(request);
+            String shortUrl = baseUrl + "/r/" + shortCode;
+
+            request.setAttribute("shortUrl", shortUrl);
+            request.setAttribute("originalUrl", longUrl);
+            RequestDispatcher dispatcher = request.getRequestDispatcher("result.jsp");
+            dispatcher.forward(request, response);
+            
+            
+            
+			/*
+			 * boolean saved = dao.saveUrlMapping(longUrl, shortCode);
+			 * 
+			 * if (saved) { // Build the short URL String baseUrl = getBaseUrl(request);
+			 * String shortUrl = baseUrl + "/r/" + shortCode;
+			 * 
+			 * request.setAttribute("shortUrl", shortUrl);
+			 * request.setAttribute("originalUrl", longUrl); RequestDispatcher dispatcher =
+			 * request.getRequestDispatcher("result.jsp"); dispatcher.forward(request,
+			 * response); } else { request.setAttribute("error",
+			 * "Failed to create short URL. Please try again."); RequestDispatcher
+			 * dispatcher = request.getRequestDispatcher("index.jsp");
+			 * dispatcher.forward(request, response); }
+			 */
             
         } catch (SQLException e) {
             e.printStackTrace();

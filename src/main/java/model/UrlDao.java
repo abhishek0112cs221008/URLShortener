@@ -4,7 +4,7 @@ import java.sql.*;
 
 public class UrlDao {
     
-    private static final String URL = "jdbc:mysql://localhost:3306/url_shortener?useSSL=false&serverTimezone=UTC";
+    private static final String URL = "jdbc:mysql://localhost:3306/url_shortener";
     private static final String USER = "root";
     private static final String PASSWORD = "0000";
     
@@ -68,5 +68,19 @@ public class UrlDao {
             e.printStackTrace();
         }
         return 0; // Default return if query fails
+    }
+
+    public String getShortCodeByLongUrl(String longUrl) throws SQLException {
+        String query = "SELECT short_code FROM urls WHERE long_url = ? LIMIT 1";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setString(1, longUrl);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("short_code"); // return existing short code
+                }
+            }
+        }
+        return null; // not found
     }
 }

@@ -79,7 +79,7 @@
 
         %>       
         <p class="text-neutral-500 text-sm mb-8 text-center">
-            <span id="totalUrls" class="font-bold text-neutral-300"><%= count %></span> short URLs created to <%= formattedNow %>.
+            <span id="totalUrls" class="font-bold text-neutral-300"><%= count %></span> short URLs created till <%= formattedNow %>.
         </p>
         
         <!-- Error Message (Backend Driven) -->
